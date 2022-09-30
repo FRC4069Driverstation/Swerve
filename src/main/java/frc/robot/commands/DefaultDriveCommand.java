@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
@@ -23,15 +24,27 @@ public class DefaultDriveCommand extends CommandBase {
         this.m_translationYSupplier = translationYSupplier;
         this.m_rotationSupplier = rotationSupplier;
 
+        
+
+
         addRequirements(drivetrainSubsystem);
     }
 
     @Override
     public void execute() {
         // You can use `new ChassisSpeeds(...)` for robot-oriented movement instead of field-oriented movement
+        // if(m_translationXSupplier.getAsDouble() <= 0.005 && m_translationYSupplier.getAsDouble() <= 0.005 && m_rotationSupplier.getAsDouble() <= 0.005){
+        //     m_drivetrainSubsystem.stopModules();
+        //     return;
+        // }
+
+        SmartDashboard.putNumber("XspeedCOMMAND", this.m_translationXSupplier.getAsDouble());
+        SmartDashboard.putNumber("YspeedCOMMAND", this.m_translationYSupplier.getAsDouble());
+        SmartDashboard.putNumber("TurnspeedCOMMAND", this.m_rotationSupplier.getAsDouble());
+
         m_drivetrainSubsystem.setModuleStates(m_drivetrainSubsystem.m_kinematics.toSwerveModuleStates(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                        m_translationXSupplier.getAsDouble(),
+                        -m_translationXSupplier.getAsDouble(),
                         m_translationYSupplier.getAsDouble(),
                         m_rotationSupplier.getAsDouble(),
                         m_drivetrainSubsystem.getGyroscopeRotation()

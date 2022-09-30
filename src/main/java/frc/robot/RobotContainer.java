@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+
 import java.util.List;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -36,7 +37,10 @@ public class RobotContainer {
 
   private final XboxController m_controller = new XboxController(0);
   public final TrapezoidProfile.Constraints kTheConstraints = new TrapezoidProfile.Constraints(3, Math.PI / 4);
-  SlewRateLimiter xLimiter = new SlewRateLimiter(3);
+  SlewRateLimiter XSpeedLimiter = new SlewRateLimiter(6);
+  SlewRateLimiter YSpeedLimiter = new SlewRateLimiter(6);
+
+  SlewRateLimiter TurnLimiter = new SlewRateLimiter(5);
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -48,13 +52,27 @@ public class RobotContainer {
     // Right stick X axis -> rotation
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
-            () -> -modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-    ));
+            () -> XSpeedLimiter.calculate(-modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+            () -> YSpeedLimiter.calculate(-modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+            () -> -TurnLimiter.calculate(-modifyAxis(m_controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND)));
 
     // Configure the button bindings
     configureButtonBindings();
+    
+  }
+  public double getXspeed(){
+    return (-modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND);
+
+  }
+  public double getYspeed(){
+   return (-modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND);
+
+    
+  }
+  public double getTurnspeed(){
+    return ((-modifyAxis(m_controller.getRightX())) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND );
+
+    
   }
 
   /**
@@ -67,7 +85,9 @@ public class RobotContainer {
     // Back button zeros the gyroscope
     new Button(m_controller::getAButtonPressed).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
   }
-
+  public void resetGyro(){
+    m_drivetrainSubsystem.zeroGyroscope();
+  }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -80,7 +100,7 @@ public class RobotContainer {
     List.of(
     new Translation2d(1,0), 
     new Translation2d(1,0)),
-    new Pose2d(2, -1, Rotation2d.fromDegrees(-180)), 
+    new Pose2d(2, 0, Rotation2d.fromDegrees(-180)), 
     trajectoryConfig);
 
     PIDController xController = new PIDController(0.5, 0, 0);

@@ -140,12 +140,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
  
   public void zeroGyroscope() {
-    m_pigeon.setYaw(0);
+    m_pigeon.setYaw(GyroOffset);
 
   }
 
   public Rotation2d getGyroscopeRotation() {
-    return Rotation2d.fromDegrees( m_pigeon.getYaw() + 90);
+    return Rotation2d.fromDegrees( m_pigeon.getYaw());
 
   }
 
@@ -170,24 +170,29 @@ public class DrivetrainSubsystem extends SubsystemBase {
         odometer.resetPosition(pose, getRotation2d());
   }
 
-  public void stateSet(SwerveModuleState[] state){
 
-        if(Math.abs(state[0].speedMetersPerSecond) < 0.001){
-                m_frontLeftModule.set(0, 0);
-                m_frontRightModule.set(0, 0);
-                m_backLeftModule.set(0, 0);
-                m_backRightModule.set(0, 0);
+  public void STOPZEROINGTHEWHEELS(SwerveModuleState state, SwerveModule module){
+        
+        if(Math.abs(state.speedMetersPerSecond) <= 0.001){
+                module.set(0, module.getSteerAngle());
                 return;
         }
-  }
+        module.set(state.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, state.angle.getRadians());
 
+
+}
   public void setModuleStates(SwerveModuleState[] states){
 
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
-        m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());
-        m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
-        m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
-        m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
+        STOPZEROINGTHEWHEELS(states[0], m_frontLeftModule);
+        STOPZEROINGTHEWHEELS(states[1], m_frontRightModule);
+        STOPZEROINGTHEWHEELS(states[2], m_backLeftModule);
+        STOPZEROINGTHEWHEELS(states[3], m_backRightModule);
+
+        // m_frontLeftModule.set(speedFromState(states[0],m_frontLeftModule), rotationFormState(states[0], m_frontLeftModule));
+        // m_frontRightModule.set(speedFromState(states[1], m_frontRightModule), rotationFormState(states[1], m_frontRightModule));
+        // m_backLeftModule.set(speedFromState(states[2], m_backLeftModule), rotationFormState(states[2], m_backLeftModule));
+        // m_backRightModule.set(speedFromState(states[3], m_backRightModule), rotationFormState(states[3],m_backRightModule));
   }
 
   public void stopModules(){
