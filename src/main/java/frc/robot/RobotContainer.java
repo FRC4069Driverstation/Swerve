@@ -17,7 +17,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -34,13 +36,11 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
-
   private final XboxController m_controller = new XboxController(0);
   public final TrapezoidProfile.Constraints kTheConstraints = new TrapezoidProfile.Constraints(3, Math.PI / 4);
-  SlewRateLimiter XSpeedLimiter = new SlewRateLimiter(6);
-  SlewRateLimiter YSpeedLimiter = new SlewRateLimiter(6);
-
-  SlewRateLimiter TurnLimiter = new SlewRateLimiter(5);
+  SlewRateLimiter XSpeedLimiter = new SlewRateLimiter(5);
+  SlewRateLimiter YSpeedLimiter = new SlewRateLimiter(5);
+  SlewRateLimiter TurnLimiter = new SlewRateLimiter(3);
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -55,26 +55,23 @@ public class RobotContainer {
             () -> XSpeedLimiter.calculate(-modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
             () -> YSpeedLimiter.calculate(-modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
             () -> -TurnLimiter.calculate(-modifyAxis(m_controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND)));
-
+    
     // Configure the button bindings
     configureButtonBindings();
     
   }
   public double getXspeed(){
-    return (-modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND);
-
+    return m_controller.getLeftX();
   }
   public double getYspeed(){
-   return (-modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND);
-
-    
+   return m_controller.getLeftY();
   }
   public double getTurnspeed(){
-    return ((-modifyAxis(m_controller.getRightX())) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND );
-
-    
+    return m_controller.getRightX();
   }
-
+  public DrivetrainSubsystem getDrivetrainSubsystem(){
+  return m_drivetrainSubsystem;
+  }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -94,6 +91,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    
+    /*
     TrajectoryConfig trajectoryConfig = new TrajectoryConfig(2, 1).setKinematics(m_drivetrainSubsystem.m_kinematics);
 
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(new Pose2d(0,0, new Rotation2d(0)), 
@@ -107,6 +106,7 @@ public class RobotContainer {
     PIDController yController = new PIDController(0.5, 0, 0);
     ProfiledPIDController thetaController = new ProfiledPIDController(1, 0, 0, kTheConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    
 
     SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
       trajectory, 
@@ -117,13 +117,16 @@ public class RobotContainer {
       thetaController, 
       m_drivetrainSubsystem::setModuleStates, 
       m_drivetrainSubsystem);
-
+    
     return new SequentialCommandGroup(
       new InstantCommand(() -> m_drivetrainSubsystem.resetOdometery(trajectory.getInitialPose())),
       swerveControllerCommand,
       new InstantCommand(() -> m_drivetrainSubsystem.stopModules())
-    );
+    ); 
+    */
+    return new InstantCommand();
   }
+
 
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {

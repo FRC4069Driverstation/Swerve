@@ -11,7 +11,7 @@ public final class Constants {
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(9.39)*2; 
     public static final double DRIVETRAIN_WHEELBASE_METERS = Units.inchesToMeters(9.39)*2; 
 
-    public static final int DRIVETRAIN_PIGEON_ID = 20;
+    public static final int DRIVETRAIN_PIGEON_ID = 17;
 
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 2;
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 1; 
@@ -37,7 +37,6 @@ public final class Constants {
     public static final int BACK_RIGHT_MODULE_SPEED_ENCODER = 15; 
     public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(241.7-0); //+2
 
-    public static final double GyroOffset = -180;
 
   
 }
